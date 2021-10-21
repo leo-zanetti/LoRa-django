@@ -8,9 +8,9 @@ import json
 import serial
 import time
 
-# array = []
-# sr = serial.Serial(port="COM3", baudrate=115200)
-
+array = []
+sr = serial.Serial(port="COM3", baudrate=115200, timeout=1)
+  
 def user_login(request):
     return render(request, 'login.html')
 
@@ -40,19 +40,25 @@ def home(request):
 	return render(request, 'home.html')
 
 def getData(request):
-    while True:
-        # sensorData = sr.readline().decode('utf-8') 
-        # array = sensorData.split("/")
-        # print(array)
-        if array[0] == '11':
-            data = {}
+    data = {}
+    sensorData = sr.readline()
+    values = str(sensorData[0:len(sensorData)].decode('utf-8'))
+    array = values.split("/")
+    print(array)
+    if len(array) != None:
+        if array[0] == "1":
             data["id"] = array[0]
             data["temperatura"] = array[1]
             data["umidade"] = array[2]
+            data["rssi"] = array[3]
             data = json.dumps(data)
-        elif array[0] == '12':
-            data = {}
+            print(data)
+            return HttpResponse(data, content_type='application/json')
+        if array[0] == "2":
             data["id"] = array[0]
             data["solo"] = array[1]
-            data = json.dumps(data)       
-        return HttpResponse(data, content_type='application/json')
+            data["rssi"] = array[2]
+            data = json.dumps(data)
+            print(data)
+            return HttpResponse(data, content_type='application/json')
+        
